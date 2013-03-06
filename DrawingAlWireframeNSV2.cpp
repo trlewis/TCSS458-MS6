@@ -1,3 +1,5 @@
+/* blah blah */
+
 //TODO: load body parts into proper triangle groups
 //TODO: be able to select different body parts
 //TODO: be able to move different body parts
@@ -85,6 +87,14 @@ point4 joints[] = {point4(0.8,-2.9,0.05,1), //ankleL
 };
 
 float joint_angles[TOTAL_GROUPS];
+
+vec3 angles[TOTAL_GROUPS];
+const int X = 0;
+const int Y = 1;
+const int Z = 2;
+int control_axis = 0;
+
+
 
 float rotate_amount = 5.0;
 
@@ -230,6 +240,13 @@ void init()
 	glEnable(GL_LIGHT0);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 
+	//projection stuff
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	//left, right, bottom, top, znear, zfar
+	//glFrustum(-1,1,-1,1,-5,5);
+	//glOrtho(-1.5,1.5,-1.5,1.5,-5,5);
+
 	glEnable( GL_DEPTH_TEST );
 
     readFile();
@@ -265,36 +282,196 @@ void tri(point4 a, point4 b, point4 c, color4 color) {
 
 void displayParts(int index) {
 	for(std::vector<Triangle>::iterator it = bodyparts[index].triangles.begin(),
-			end = bodyparts[index].triangles.end() ; it != end ; ++it) {
+			end = bodyparts[index].triangles.end() ; it != end ; ++it) 
 		tri(it->a,it->b,it->c,it->rgb);
-	}
 }
 
 void display()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glMatrixMode(GL_MODELVIEW);
+	vec3 eye(0,0,1.1);
+	vec3 at(0,0,0);
+	vec3 up(0,1,0);
 
-
-	glLoadIdentity();
-	glRotatef(yRot,0,1,0);
-	glScalef(0.3,0.3,-0.3);
 	for(int i = 0 ; i < TOTAL_GROUPS ; i++) {
+		//setup for every transformation
+		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		//glTranslatef(-joints[i].x,-joints[i].y,-joints[i].z);
-		//glRotatef(joint_angles[i],1,0,0);
-		//glTranslatef(joints[i].x,joints[i].y,joints[i].z);
+		//gluLookAt(eye.x,eye.y,eye.z,at.x,at.y,at.z,up.x,up.y,up.z);
 		glRotatef(yRot,0,1,0);
 		glScalef(0.3,0.3,-0.3);
 
-		displayParts(i);
-
-//		for(std::vector<Triangle>::iterator it = bodyparts[i].triangles.begin(),
-//				end = bodyparts[i].triangles.end() ; it != end ; ++it) {
-//			tri(it->a,it->b,it->c,it->rgb);
-//		}
+		if(i == BODY) {
+			displayParts(BODY);
+		}
+		else if(i == UPPER_LEG_L) {
+			glTranslatef(joints[UPPER_LEG_L].x,joints[UPPER_LEG_L].y,joints[UPPER_LEG_L].z);
+			//glRotatef(joint_angles[UPPER_LEG_L],1,0,0);
+			glRotatef(angles[UPPER_LEG_L].x,1,0,0);
+			glRotatef(angles[UPPER_LEG_L].y,0,1,0);
+			glRotatef(angles[UPPER_LEG_L].z,0,0,1);
+			glTranslatef(-joints[UPPER_LEG_L].x,-joints[UPPER_LEG_L].y,-joints[UPPER_LEG_L].z);
+			displayParts(UPPER_LEG_L);
+		}
+		else if(i == UPPER_LEG_R) {
+			glTranslatef(joints[UPPER_LEG_R].x,joints[UPPER_LEG_R].y,joints[UPPER_LEG_R].z);
+			//glRotatef(joint_angles[UPPER_LEG_R],1,0,0);
+			glRotatef(angles[UPPER_LEG_R].x,1,0,0);
+			glRotatef(angles[UPPER_LEG_R].y,0,1,0);
+			glRotatef(angles[UPPER_LEG_R].z,0,0,1);
+			glTranslatef(-joints[UPPER_LEG_R].x,-joints[UPPER_LEG_R].y,-joints[UPPER_LEG_R].z);
+			displayParts(UPPER_LEG_R);
+		}
+		else if(i == LOWER_LEG_L) {
+			glTranslatef(joints[UPPER_LEG_L].x,joints[UPPER_LEG_L].y,joints[UPPER_LEG_L].z);
+			//glRotatef(joint_angles[UPPER_LEG_L],1,0,0);
+			glRotatef(angles[UPPER_LEG_L].x,1,0,0);
+			glRotatef(angles[UPPER_LEG_L].y,0,1,0);
+			glRotatef(angles[UPPER_LEG_L].z,0,0,1);
+			glTranslatef(-joints[UPPER_LEG_L].x,-joints[UPPER_LEG_L].y,-joints[UPPER_LEG_L].z);
+			
+			glTranslatef(joints[LOWER_LEG_L].x,joints[LOWER_LEG_L].y,joints[LOWER_LEG_L].z);
+			//glRotatef(joint_angles[LOWER_LEG_L],1,0,0);
+			glRotatef(angles[LOWER_LEG_L].x,1,0,0);
+			glRotatef(angles[LOWER_LEG_L].y,0,1,0);
+			glRotatef(angles[LOWER_LEG_L].z,0,0,1);
+			glTranslatef(-joints[LOWER_LEG_L].x,-joints[LOWER_LEG_L].y,-joints[LOWER_LEG_L].z);
+			displayParts(LOWER_LEG_L);
+		}
+		else if(i == LOWER_LEG_R) {
+			glTranslatef(joints[UPPER_LEG_R].x,joints[UPPER_LEG_R].y,joints[UPPER_LEG_R].z);
+			//glRotatef(joint_angles[UPPER_LEG_R],1,0,0);
+			glRotatef(angles[UPPER_LEG_R].x,1,0,0);
+			glRotatef(angles[UPPER_LEG_R].y,0,1,0);
+			glRotatef(angles[UPPER_LEG_R].z,0,0,1);
+			glTranslatef(-joints[UPPER_LEG_R].x,-joints[UPPER_LEG_R].y,-joints[UPPER_LEG_R].z);
+			
+			glTranslatef(joints[LOWER_LEG_R].x,joints[LOWER_LEG_R].y,joints[LOWER_LEG_R].z);
+			//glRotatef(joint_angles[LOWER_LEG_R],1,0,0);
+			glRotatef(angles[LOWER_LEG_R].x,1,0,0);
+			glRotatef(angles[LOWER_LEG_R].y,0,1,0);
+			glRotatef(angles[LOWER_LEG_R].z,0,0,1);
+			glTranslatef(-joints[LOWER_LEG_R].x,-joints[LOWER_LEG_R].y,-joints[LOWER_LEG_R].z);
+			displayParts(LOWER_LEG_R);
+		}
+		else if(i == FOOT_L) {
+			glTranslatef(joints[UPPER_LEG_L].x,joints[UPPER_LEG_L].y,joints[UPPER_LEG_L].z);
+			//glRotatef(joint_angles[UPPER_LEG_L],1,0,0);
+			glRotatef(angles[UPPER_LEG_L].x,1,0,0);
+			glRotatef(angles[UPPER_LEG_L].y,0,1,0);
+			glRotatef(angles[UPPER_LEG_L].z,0,0,1);
+			glTranslatef(-joints[UPPER_LEG_L].x,-joints[UPPER_LEG_L].y,-joints[UPPER_LEG_L].z);
+			
+			glTranslatef(joints[LOWER_LEG_L].x,joints[LOWER_LEG_L].y,joints[LOWER_LEG_L].z);
+			//glRotatef(joint_angles[LOWER_LEG_L],1,0,0);
+			glRotatef(angles[LOWER_LEG_L].x,1,0,0);
+			glRotatef(angles[LOWER_LEG_L].y,0,1,0);
+			glRotatef(angles[LOWER_LEG_L].z,0,0,1);
+			glTranslatef(-joints[LOWER_LEG_L].x,-joints[LOWER_LEG_L].y,-joints[LOWER_LEG_L].z);
+			
+			glTranslatef(joints[FOOT_L].x,joints[FOOT_L].y,joints[FOOT_L].z);
+			//glRotatef(joint_angles[FOOT_L],1,0,0);
+			glRotatef(angles[FOOT_L].x,1,0,0);
+			glRotatef(angles[FOOT_L].y,0,1,0);
+			glRotatef(angles[FOOT_L].z,0,0,1);
+			glTranslatef(-joints[FOOT_L].x,-joints[FOOT_L].y,-joints[FOOT_L].z);
+			displayParts(FOOT_L);
+		}
+		else if(i == FOOT_R) {
+			glTranslatef(joints[UPPER_LEG_R].x,joints[UPPER_LEG_R].y,joints[UPPER_LEG_R].z);
+			//glRotatef(joint_angles[UPPER_LEG_R],1,0,0);
+			glRotatef(angles[UPPER_LEG_R].x,1,0,0);
+			glRotatef(angles[UPPER_LEG_R].y,0,1,0);
+			glRotatef(angles[UPPER_LEG_R].z,0,0,1);
+			glTranslatef(-joints[UPPER_LEG_R].x,-joints[UPPER_LEG_R].y,-joints[UPPER_LEG_R].z);
+			
+			glTranslatef(joints[LOWER_LEG_R].x,joints[LOWER_LEG_R].y,joints[LOWER_LEG_R].z);
+			//glRotatef(joint_angles[LOWER_LEG_R],1,0,0);
+			glRotatef(angles[LOWER_LEG_R].x,1,0,0);
+			glRotatef(angles[LOWER_LEG_R].y,0,1,0);
+			glRotatef(angles[LOWER_LEG_R].z,0,0,1);
+			glTranslatef(-joints[LOWER_LEG_R].x,-joints[LOWER_LEG_R].y,-joints[LOWER_LEG_R].z);
+			
+			glTranslatef(joints[FOOT_R].x,joints[FOOT_R].y,joints[FOOT_R].z);
+			//glRotatef(joint_angles[FOOT_R],1,0,0);
+			glRotatef(angles[FOOT_R].x,1,0,0);
+			glRotatef(angles[FOOT_R].y,0,1,0);
+			glRotatef(angles[FOOT_R].z,0,0,1);
+			glTranslatef(-joints[FOOT_R].x,-joints[FOOT_R].y,-joints[FOOT_R].z);
+			displayParts(FOOT_R);
+		}
+		else if(i == UPPER_ARM_L) {
+			glTranslatef(joints[UPPER_ARM_L].x,joints[UPPER_ARM_L].y,joints[UPPER_ARM_L].z);
+			//glRotatef(joint_angles[UPPER_ARM_L],1,0,0);
+			glRotatef(angles[UPPER_ARM_L].x,1,0,0);
+			glRotatef(angles[UPPER_ARM_L].y,0,1,0);
+			glRotatef(angles[UPPER_ARM_L].z,0,0,1);
+			glTranslatef(-joints[UPPER_ARM_L].x,-joints[UPPER_ARM_L].y,-joints[UPPER_ARM_L].z);			
+			displayParts(UPPER_ARM_L);
+		}
+		else if(i == UPPER_ARM_R) {
+			glTranslatef(joints[UPPER_ARM_R].x,joints[UPPER_ARM_R].y,joints[UPPER_ARM_R].z);
+			//glRotatef(joint_angles[UPPER_ARM_R],1,0,0);
+			glRotatef(angles[UPPER_ARM_R].x,1,0,0);
+			glRotatef(angles[UPPER_ARM_R].y,0,1,0);
+			glRotatef(angles[UPPER_ARM_R].z,0,0,1);
+			glTranslatef(-joints[UPPER_ARM_R].x,-joints[UPPER_ARM_R].y,-joints[UPPER_ARM_R].z);			
+			displayParts(UPPER_ARM_R);
+		}
+		else if(i == LOWER_ARM_L) {
+			glTranslatef(joints[UPPER_ARM_L].x,joints[UPPER_ARM_L].y,joints[UPPER_ARM_L].z);
+			//glRotatef(joint_angles[UPPER_ARM_L],1,0,0);
+			glRotatef(angles[UPPER_ARM_L].x,1,0,0);
+			glRotatef(angles[UPPER_ARM_L].y,0,1,0);
+			glRotatef(angles[UPPER_ARM_L].z,0,0,1);
+			glTranslatef(-joints[UPPER_ARM_L].x,-joints[UPPER_ARM_L].y,-joints[UPPER_ARM_L].z);		
+			
+			glTranslatef(joints[LOWER_ARM_L].x,joints[LOWER_ARM_L].y,joints[LOWER_ARM_L].z);
+			//glRotatef(joint_angles[LOWER_ARM_L],1,0,0);
+			glRotatef(angles[LOWER_ARM_L].x,1,0,0);
+			glRotatef(angles[LOWER_ARM_L].y,0,1,0);
+			glRotatef(angles[LOWER_ARM_L].z,0,0,1);
+			glTranslatef(-joints[LOWER_ARM_L].x,-joints[LOWER_ARM_L].y,-joints[LOWER_ARM_L].z);		
+			displayParts(LOWER_ARM_L);
+		}
+		else if(i == LOWER_ARM_R) {
+			glTranslatef(joints[UPPER_ARM_R].x,joints[UPPER_ARM_R].y,joints[UPPER_ARM_R].z);
+			//glRotatef(joint_angles[UPPER_ARM_R],1,0,0);
+			glRotatef(angles[UPPER_ARM_R].x,1,0,0);
+			glRotatef(angles[UPPER_ARM_R].y,0,1,0);
+			glRotatef(angles[UPPER_ARM_R].z,0,0,1);
+			glTranslatef(-joints[UPPER_ARM_R].x,-joints[UPPER_ARM_R].y,-joints[UPPER_ARM_R].z);		
+			
+			glTranslatef(joints[LOWER_ARM_R].x,joints[LOWER_ARM_R].y,joints[LOWER_ARM_R].z);
+			//glRotatef(joint_angles[LOWER_ARM_R],1,0,0);
+			glRotatef(angles[LOWER_ARM_R].x,1,0,0);
+			glRotatef(angles[LOWER_ARM_R].y,0,1,0);
+			glRotatef(angles[LOWER_ARM_R].z,0,0,1);
+			glTranslatef(-joints[LOWER_ARM_R].x,-joints[LOWER_ARM_R].y,-joints[LOWER_ARM_R].z);		
+			displayParts(LOWER_ARM_R);
+		}
 	}
+
+
+//	glLoadIdentity();
+//	glRotatef(yRot,0,1,0);
+//	glScalef(0.3,0.3,-0.3);
+//	for(int i = 0 ; i < TOTAL_GROUPS ; i++) {
+//		glLoadIdentity();
+//		//glTranslatef(-joints[i].x,-joints[i].y,-joints[i].z);
+//		//glRotatef(joint_angles[i],1,0,0);
+//		//glTranslatef(joints[i].x,joints[i].y,joints[i].z);
+//		glRotatef(yRot,0,1,0);
+//		glScalef(0.3,0.3,-0.3);
+//
+//		displayParts(i);
+//
+////		for(std::vector<Triangle>::iterator it = bodyparts[i].triangles.begin(),
+////				end = bodyparts[i].triangles.end() ; it != end ; ++it) {
+////			tri(it->a,it->b,it->c,it->rgb);
+////		}
+//	}
 
 	
     glutSwapBuffers();
@@ -420,14 +597,22 @@ void myspecialkey(int key, int mousex, int mousey)
 	        yRot += 360.0;
 	    }
 	}
-	if(key == GLUT_KEY_DOWN)
-		joint_angles[selectedBodyPart] += rotate_amount;
+	if(key == GLUT_KEY_DOWN) {
+		if(control_axis == X) angles[selectedBodyPart].x += rotate_amount;
+		if(control_axis == Y) angles[selectedBodyPart].y += rotate_amount;
+		if(control_axis == Z) angles[selectedBodyPart].z += rotate_amount;
+		//joint_angles[selectedBodyPart] += rotate_amount;
 		//rotateParts(selectedBodyPart,rotate_amount);
 		//rotateParts(selectedBodyPart,rotate_amount,joints[selectedBodyPart]);
-	if(key == GLUT_KEY_UP)
+	}
+	if(key == GLUT_KEY_UP) {
+		if(control_axis == X) angles[selectedBodyPart].x -= rotate_amount;
+		if(control_axis == Y) angles[selectedBodyPart].y -= rotate_amount;
+		if(control_axis == Z) angles[selectedBodyPart].z -= rotate_amount;
 		joint_angles[selectedBodyPart] -= rotate_amount;
 		//rotateParts(selectedBodyPart,-rotate_amount);
 		//rotateParts(selectedBodyPart,-rotate_amount,joints[selectedBodyPart]);
+	}
 
     glutPostRedisplay();
 }
@@ -449,6 +634,10 @@ void mykey(unsigned char key, int mousex, int mousey)
     if(key=='S') selectedBodyPart = UPPER_ARM_R;
     if(key=='b' || key=='B') selectedBodyPart = BODY;
 
+	if(key=='x' || key=='X') control_axis = X;
+	if(key=='y' || key=='Y') control_axis = Y;
+	if(key=='z' || key=='Z') control_axis = Z;
+
     glutPostRedisplay();
 }
 
@@ -460,8 +649,11 @@ void reshape(GLsizei ww, GLsizei hh)
 
 int main(int argc, char** argv)
 {
-	for(int i = 0 ; i < TOTAL_GROUPS ; i++)
+	for(int i = 0 ; i < TOTAL_GROUPS ; i++) {
 		joint_angles[i] = 0;
+		angles[i] = vec3(0,0,0);
+	}
+
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
